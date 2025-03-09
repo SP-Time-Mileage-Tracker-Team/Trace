@@ -17,7 +17,7 @@ const Tab = createBottomTabNavigator();
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null)
-  const [isNewUser, setIsNewUser] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
