@@ -12,12 +12,15 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from '@react-navigation/native'
 import TabBarIcon from './components/TabBarIcon';
 
+import "./global.css"
+import { PaperProvider } from 'react-native-paper'
+
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null)
-  const [isNewUser, setIsNewUser] = useState(true);
+  const [isNewUser, setIsNewUser] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -30,6 +33,7 @@ export default function App() {
   }, [])
 
   return (
+    <PaperProvider>
     <NavigationContainer>
       {session && session.user 
       ? 
@@ -137,5 +141,6 @@ export default function App() {
       : <LoginScreen />
       }
     </NavigationContainer>
+    </PaperProvider>
   )
 }

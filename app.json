@@ -12,6 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "android.config.googleMaps.apiKey":  "AIzaSyAuiKYBAAsganVy6gvYwV3tO_8j_Nl5CAU",
     "ios": {
       "supportsTablet": true
     },
@@ -22,6 +23,7 @@
       }
     },
     "web": {
+      "bundler": "metro",
       "favicon": "./assets/favicon.png"
     }
   }
