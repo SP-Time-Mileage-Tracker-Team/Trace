@@ -4,7 +4,7 @@ import { Session } from '@supabase/supabase-js'
 export default function HomeScreen({ session }: { session: Session }) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Home Screen</Text>
+      <Text style={styles.title}>No Activities Recorded Yet!</Text>
       <View style={styles.separator} />
     </View>
   );

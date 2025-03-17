@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 export default function ReportScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Report Screen</Text>
+      <Text style={styles.title}>Total Miles Run: 0</Text>
       <View style={styles.separator} />
     </View>
   );
