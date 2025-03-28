@@ -4,6 +4,11 @@ import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Button } from 'react-native-paper';
 import TabBarIcon from '../components/TabBarIcon';
 import * as Location from 'expo-location';
+import * as TaskManager from "expo-task-manager"
+
+const TASK_NAME = "BACKGROUND_LOCATION_TASK"
+const DEFAULT_LATITUDE = 34.0;
+const DEFAULT_LONGITUDE = -84.48;
 
 export default function RecordScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -13,21 +18,66 @@ export default function RecordScreen() {
   const [timerText, setTimerText] = useState("");
   const startTimeRef = useRef(0);
   const [activityName, setActivityName] = useState("Walking");
+  let backgroundPermission: any;
 
-  useEffect(() => {
-    async function getCurrentLocation() {
-      //let { status } = await Location.requestForegroundPermissionsAsync();
-      let { status } = await Location.requestBackgroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        return;
-      }
+  async function requestLocationPermissions() {
+    const foregroundPermission = await Location.requestForegroundPermissionsAsync();
 
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
+    if (!foregroundPermission.granted) {
+      setErrorMsg('Permission to access location in foreground was denied');
+      return;
     }
 
-    getCurrentLocation();
+    backgroundPermission = await Location.getBackgroundPermissionsAsync()
+
+    if (!backgroundPermission.granted) {
+      setErrorMsg('Permission to access location in background was denied');
+      return;
+    }
+
+    //let location = await Location.getCurrentPositionAsync({});
+    //setLocation(location);
+  }
+
+  TaskManager.defineTask(TASK_NAME, async ({ data, error } :any) => {
+    if (error) {
+      console.error(error);
+      return;
+    }
+    if (data) {
+      /* Data object example:
+        {
+          locations: [
+            {
+              coords: {
+                accuracy: 22.5,
+                altitude: 61.80000305175781,
+                altitudeAccuracy: 1.3333333730697632,
+                heading: 0,
+                latitude: 36.7384187,
+                longitude: 3.3464008,
+                speed: 0,
+              },
+              timestamp: 1640286402303,
+            },
+          ],
+        };
+      */
+  
+      const { locations } = data;
+      const location = locations[0];
+  
+      if (location) {
+        // Do something with location...
+        setLocation(location);
+        console.log(location);
+      }
+      
+    }
+  });
+
+  useEffect(() => {
+    requestLocationPermissions();
 
     let interval : any;
     if(recording) {
@@ -55,9 +105,26 @@ export default function RecordScreen() {
     if (recording) {
       console.log("Stop recording");
       setRecording(false);
+      Location.stopLocationUpdatesAsync(TASK_NAME)
     } else {
       console.log("Start recording");
-      setRecording(true);
+
+      if (backgroundPermission.granted) {
+        setRecording(true);
+        Location.startLocationUpdatesAsync(TASK_NAME, {
+          // The following notification options will help keep tracking consistent
+          showsBackgroundLocationIndicator: true,
+          foregroundService: {
+            notificationTitle: "Location",
+            notificationBody: "Location tracking in background",
+            notificationColor: "#fff",
+          },
+        })
+      }
+      else {
+        setRecording(false);
+        requestLocationPermissions();
+      }
       // TODO:: save activity
       setTime(0);
     }
@@ -85,18 +152,21 @@ export default function RecordScreen() {
         <MapView
           provider={PROVIDER_GOOGLE}
           style={styles.map}
-          initialRegion={{
-            latitude: 37.78825,
-            longitude: -122.4324,
+          region={{
+            latitude: location ? location.coords.latitude : DEFAULT_LATITUDE,
+            longitude: location ? location.coords.longitude : DEFAULT_LONGITUDE,
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
           }}
         >
-          {/* <Marker
-            coordinate={{ latitude: 37.78825, longitude: -122.4324 }}
+          <Marker
+            coordinate={{ 
+              latitude: location ? location.coords.latitude : DEFAULT_LATITUDE, 
+              longitude: location ? location.coords.longitude : DEFAULT_LONGITUDE 
+            }}
             title="Marker Title"
             description="Marker Description"
-          /> */}
+          />
         </MapView>
       </View>
       <View className='flex flex-row w-full h-40 justify-center'>
