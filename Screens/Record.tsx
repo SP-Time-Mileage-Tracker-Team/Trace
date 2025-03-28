@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { LatLng, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Button } from 'react-native-paper';
 import TabBarIcon from '../components/TabBarIcon';
 import * as Location from 'expo-location';
@@ -9,6 +9,12 @@ import * as TaskManager from "expo-task-manager"
 const TASK_NAME = "BACKGROUND_LOCATION_TASK"
 const DEFAULT_LATITUDE = 34.0;
 const DEFAULT_LONGITUDE = -84.48;
+const INITIAL_REGION = {
+  latitude: DEFAULT_LATITUDE,
+  longitude: DEFAULT_LONGITUDE,
+  latitudeDelta: 0.0922,
+  longitudeDelta: 0.0421,
+};
 
 export default function RecordScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -18,6 +24,9 @@ export default function RecordScreen() {
   const [timerText, setTimerText] = useState("");
   const startTimeRef = useRef(0);
   const [activityName, setActivityName] = useState("Walking");
+  const [routeCoordinates, setRouteCoordinates] = useState<any>([]);
+  const [showUserLocation, setShowUserLocation] = useState(false);
+  const [followUserLocation, setFollowUserLocation] = useState(false);
   let backgroundPermission: any;
 
   async function requestLocationPermissions() {
@@ -70,7 +79,13 @@ export default function RecordScreen() {
       if (location) {
         // Do something with location...
         setLocation(location);
-        console.log(location);
+
+        const newCoords = { latitude: location.coords.latitude, longitude: location.coords.longitude };
+
+        setRouteCoordinates((prevCoords:any) => [...prevCoords, newCoords]);
+        //console.log(location);
+
+        console.log(routeCoordinates)
       }
       
     }
@@ -99,18 +114,22 @@ export default function RecordScreen() {
     text = JSON.stringify(location);
   }
 
-  console.log(text);
+  //console.log(text);
 
   const handlePressRecord = () => {
     if (recording) {
       console.log("Stop recording");
       setRecording(false);
+      setShowUserLocation(false);
+      setFollowUserLocation(false);
       Location.stopLocationUpdatesAsync(TASK_NAME)
     } else {
       console.log("Start recording");
 
       if (backgroundPermission.granted) {
         setRecording(true);
+        setShowUserLocation(true);
+        setFollowUserLocation(true);
         Location.startLocationUpdatesAsync(TASK_NAME, {
           // The following notification options will help keep tracking consistent
           showsBackgroundLocationIndicator: true,
@@ -152,21 +171,33 @@ export default function RecordScreen() {
         <MapView
           provider={PROVIDER_GOOGLE}
           style={styles.map}
+          initialRegion={INITIAL_REGION}
           region={{
             latitude: location ? location.coords.latitude : DEFAULT_LATITUDE,
             longitude: location ? location.coords.longitude : DEFAULT_LONGITUDE,
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
           }}
+          showsUserLocation={showUserLocation}
+          followsUserLocation={followUserLocation}
         >
-          <Marker
-            coordinate={{ 
-              latitude: location ? location.coords.latitude : DEFAULT_LATITUDE, 
-              longitude: location ? location.coords.longitude : DEFAULT_LONGITUDE 
-            }}
-            title="Marker Title"
-            description="Marker Description"
-          />
+          {routeCoordinates.length > 1 && (
+                    <Polyline
+                        coordinates={routeCoordinates}
+                        strokeColor="#000"
+                        strokeWidth={3}
+                        lineDashPattern={[]}
+                    />
+                )}
+                {/* {location && (
+                    <Marker
+                      coordinate={{ 
+                        latitude: location ? location.coords.latitude : DEFAULT_LATITUDE, 
+                        longitude: location ? location.coords.longitude : DEFAULT_LONGITUDE 
+                      }}
+                      title="Current Location"
+                    />
+                )} */}
         </MapView>
       </View>
       <View className='flex flex-row w-full h-40 justify-center'>
