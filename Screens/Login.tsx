@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
-import { Alert, StyleSheet, View, AppState } from 'react-native'
+import { Alert, StyleSheet, View, AppState, Image } from 'react-native'
 import { supabase } from '../Supabase'
-import { Button, Input } from '@rneui/themed'
+import { Button, TextInput } from 'react-native-paper'
+import { useNavigation } from '@react-navigation/native';
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -16,6 +17,7 @@ AppState.addEventListener('change', (state) => {
 })
 
 export default function LoginScreen() {
+  const navigation = useNavigation<any>();
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -47,33 +49,42 @@ export default function LoginScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View className='flex flex-rows mt-20 mb-20 p-5 w-full justify-center'>
+      <Image 
+      className='flex w-full h-80'
+      source={require('../assets/icon.png')}
+      />
+      <TextInput
+        mode='outlined'
+        className='flex'
+        label="Email"
+        onChangeText={(text) => setEmail(text)}
+        value={email}
+        autoCapitalize={'none'}
+      />
+      <TextInput
+        mode='outlined'
+        label="Password"
+        onChangeText={(text) => setPassword(text)}
+        value={password}
+        secureTextEntry={true}
+        autoCapitalize={'none'}
+      />
       <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Input
-          label="Email"
-          leftIcon={{ type: 'font-awesome', name: 'envelope' }}
-          onChangeText={(text) => setEmail(text)}
-          value={email}
-          placeholder="email@address.com"
-          autoCapitalize={'none'}
-        />
+        <Button 
+        mode='contained'
+        disabled={loading} 
+        onPress={() => signInWithEmail()}>
+          Sign In
+        </Button>
       </View>
       <View style={styles.verticallySpaced}>
-        <Input
-          label="Password"
-          leftIcon={{ type: 'font-awesome', name: 'lock' }}
-          onChangeText={(text) => setPassword(text)}
-          value={password}
-          secureTextEntry={true}
-          placeholder="Password"
-          autoCapitalize={'none'}
-        />
-      </View>
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Button title="Sign in" disabled={loading} onPress={() => signInWithEmail()} />
-      </View>
-      <View style={styles.verticallySpaced}>
-        <Button title="Sign up" disabled={loading} onPress={() => signUpWithEmail()} />
+        <Button 
+        mode='outlined'
+        disabled={loading} 
+        onPress={() => navigation.navigate("NewUserScreen")}>
+          Register
+        </Button>
       </View>
     </View>
   )

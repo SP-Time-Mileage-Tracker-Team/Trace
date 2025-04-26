@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { StyleSheet, Text, View, Alert } from 'react-native';
 import { supabase } from '../Supabase'
-import { Button, Input } from '@rneui/themed'
+import { Button, TextInput } from 'react-native-paper'
 
-export default function NewUserScreen({setIsNewUser, userId}) {
+export default function NewUserScreen() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -24,10 +24,14 @@ export default function NewUserScreen({setIsNewUser, userId}) {
   }
 
   return (
-    <View style={styles.container}>
+    <View className='flex flex-rows mt-20 mb-20 p-5 w-full justify-center'>
+      <Text className='w-4/5 h-16 text-2xl text-white bg-[#228B22] text-center'>
+        New User
+      </Text>
     <View style={[styles.verticallySpaced, styles.mt20]}>
       <Text>Email</Text>
-      <Input
+      <TextInput
+        mode='outlined'
         onChangeText={(text) => setEmail(text)}
         value={email}
         placeholder="Email@address.com"
@@ -36,7 +40,8 @@ export default function NewUserScreen({setIsNewUser, userId}) {
     </View>
     <View style={styles.verticallySpaced}>
       <Text>Password</Text>
-      <Input
+      <TextInput
+        mode='outlined'
         onChangeText={(text) => setPassword(text)}
         value={password}
         secureTextEntry={true}
@@ -46,7 +51,8 @@ export default function NewUserScreen({setIsNewUser, userId}) {
     </View>
     <View style={styles.verticallySpaced}>
       <Text>Re-Type Password</Text>
-      <Input
+      <TextInput
+        mode='outlined'
         onChangeText={(text) => setPassword(text)}
         value={password}
         secureTextEntry={true}
@@ -55,7 +61,12 @@ export default function NewUserScreen({setIsNewUser, userId}) {
       />
     </View>
     <View style={styles.verticallySpaced}>
-      <Button title="Sign up" disabled={loading} onPress={() => signUpWithEmail()} />
+      <Button 
+        mode='contained'
+        disabled={loading} 
+        onPress={() => signUpWithEmail()}>
+        Sign Up
+      </Button>
     </View>
   </View>
   );
