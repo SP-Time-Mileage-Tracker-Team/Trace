@@ -7,8 +7,8 @@ import * as Location from 'expo-location';
 import * as TaskManager from "expo-task-manager"
 
 const TASK_NAME = "BACKGROUND_LOCATION_TASK"
-const DEFAULT_LATITUDE = 34.0;
-const DEFAULT_LONGITUDE = -84.48;
+const DEFAULT_LATITUDE = 33.0;
+const DEFAULT_LONGITUDE = -83.48;
 const INITIAL_REGION = {
   latitude: DEFAULT_LATITUDE,
   longitude: DEFAULT_LONGITUDE,
@@ -27,7 +27,7 @@ export default function RecordScreen() {
   const [routeCoordinates, setRouteCoordinates] = useState<any>([]);
   const [showUserLocation, setShowUserLocation] = useState(false);
   const [followUserLocation, setFollowUserLocation] = useState(false);
-  let backgroundPermission: any;
+  const [hasLocationPermission, setHasLocationPermission] = useState(false);
 
   async function requestLocationPermissions() {
     const foregroundPermission = await Location.requestForegroundPermissionsAsync();
@@ -37,15 +37,24 @@ export default function RecordScreen() {
       return;
     }
 
-    backgroundPermission = await Location.getBackgroundPermissionsAsync()
+    const backgroundPermission = await Location.getBackgroundPermissionsAsync()
 
     if (!backgroundPermission.granted) {
       setErrorMsg('Permission to access location in background was denied');
       return;
     }
 
-    //let location = await Location.getCurrentPositionAsync({});
-    //setLocation(location);
+    setHasLocationPermission(true);
+
+    // let location = await Location.getCurrentPositionAsync({});
+    // setLocation(location);
+    
+    // const newCoords = { latitude: location.coords.latitude, longitude: location.coords.longitude };
+
+    // setRouteCoordinates((prevCoords:any) => [...prevCoords, newCoords]);
+    // //console.log(location);
+
+    // console.log(routeCoordinates);
   }
 
   TaskManager.defineTask(TASK_NAME, async ({ data, error } :any) => {
@@ -79,13 +88,9 @@ export default function RecordScreen() {
       if (location) {
         // Do something with location...
         setLocation(location);
+        setRouteCoordinates(routeCoordinates.concat(location.coords));
 
-        const newCoords = { latitude: location.coords.latitude, longitude: location.coords.longitude };
-
-        setRouteCoordinates((prevCoords:any) => [...prevCoords, newCoords]);
-        //console.log(location);
-
-        console.log(routeCoordinates)
+        console.log(routeCoordinates);
       }
       
     }
@@ -126,18 +131,26 @@ export default function RecordScreen() {
     } else {
       console.log("Start recording");
 
-      if (backgroundPermission.granted) {
+      if (hasLocationPermission) {
         setRecording(true);
         setShowUserLocation(true);
         setFollowUserLocation(true);
         Location.startLocationUpdatesAsync(TASK_NAME, {
           // The following notification options will help keep tracking consistent
+          
+          accuracy: Location.Accuracy.Highest,
+          // timeInterval: 1000,
+          // distanceInterval: 0,
           showsBackgroundLocationIndicator: true,
           foregroundService: {
             notificationTitle: "Location",
             notificationBody: "Location tracking in background",
-            notificationColor: "#fff",
+            notificationColor: "#FF0000",
           },
+          pausesUpdatesAutomatically: false,
+          // deferredUpdatesInterval: 1000,
+          // deferredUpdatesDistance: 0,
+          // deferredUpdatesTimeout: 1000,
         })
       }
       else {
