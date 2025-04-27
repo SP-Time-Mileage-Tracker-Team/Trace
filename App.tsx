@@ -22,7 +22,7 @@ const Tab = createBottomTabNavigator();
 const mainThemeLight = {
   "colors": {
     "primary": "#228B22",
-    "onPrimary": "rgb(3, 3, 3)",
+    "onPrimary": "rgb(255, 255, 255)",
     "primaryContainer": "rgb(240, 219, 255)",
     "onPrimaryContainer": "rgb(44, 0, 81)",
     "secondary": "rgb(102, 90, 111)",

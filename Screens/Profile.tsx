@@ -106,7 +106,7 @@ export default function ProfileScreen({ session }: { session: Session }) {
 
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Button
-          mode='outlined'
+          mode='contained'
           onPress={() => updateProfile({ username, website, avatar_url: avatarUrl })}
           disabled={loading}
         >
