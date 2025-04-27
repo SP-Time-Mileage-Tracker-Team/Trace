@@ -1,6 +1,6 @@
 import { StyleSheet, Dimensions } from "react-native";
 
-export const PRIMARY_COLOR = "#7444C0";
+export const PRIMARY_COLOR = "#228B22";
 export const SECONDARY_COLOR = "#5636B8";
 export const WHITE = "#FFFFFF";
 export const GRAY = "#757E90";
@@ -317,6 +317,9 @@ export default StyleSheet.create({
   // MENU
   tabButtonText: {
     textTransform: "uppercase",
+    width: 80,
+    fontSize: 16,
+    textAlign: "center",
   },
   iconMenu: {
     alignItems: "center",

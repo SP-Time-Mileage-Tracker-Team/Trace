@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../Supabase'
 import { StyleSheet, View, Alert } from 'react-native'
-import { Button, Input } from '@rneui/themed'
 import { Session } from '@supabase/supabase-js'
+import { Button, TextInput } from 'react-native-paper'
 
 export default function ProfileScreen({ session }: { session: Session }) {
   const [loading, setLoading] = useState(true)
@@ -78,27 +78,48 @@ export default function ProfileScreen({ session }: { session: Session }) {
   }
 
   return (
-    <View style={styles.container}>
+    <View className='flex flex-rows mt-20 mb-20 p-5 w-full justify-center'>
       <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Input label="Email" value={session?.user?.email} disabled />
+        <TextInput 
+          mode='outlined'
+          label="Email" 
+          value={session?.user?.email} 
+          disabled 
+        />
       </View>
       <View style={styles.verticallySpaced}>
-        <Input label="Username" value={username || ''} onChangeText={(text) => setUsername(text)} />
+        <TextInput 
+          mode='outlined'
+          label="Username" 
+          value={username || ''} 
+          onChangeText={(text) => setUsername(text)} 
+        />
       </View>
       <View style={styles.verticallySpaced}>
-        <Input label="Website" value={website || ''} onChangeText={(text) => setWebsite(text)} />
+        <TextInput 
+          mode='outlined'
+          label="Website" 
+          value={website || ''} 
+          onChangeText={(text) => setWebsite(text)} 
+        />
       </View>
 
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Button
-          title={loading ? 'Loading ...' : 'Update'}
+          mode='outlined'
           onPress={() => updateProfile({ username, website, avatar_url: avatarUrl })}
           disabled={loading}
-        />
+        >
+          {loading ? 'Loading ...' : 'Update'}
+        </Button>
       </View>
 
       <View style={styles.verticallySpaced}>
-        <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
+        <Button 
+          mode='outlined'
+          onPress={() => supabase.auth.signOut()} >
+          Sign Out
+        </Button>
       </View>
     </View>
   )

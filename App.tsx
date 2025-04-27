@@ -22,7 +22,7 @@ const Tab = createBottomTabNavigator();
 const mainThemeLight = {
   "colors": {
     "primary": "#228B22",
-    "onPrimary": "rgb(255, 255, 255)",
+    "onPrimary": "rgb(3, 3, 3)",
     "primaryContainer": "rgb(240, 219, 255)",
     "onPrimaryContainer": "rgb(44, 0, 81)",
     "secondary": "rgb(102, 90, 111)",
@@ -139,9 +139,11 @@ export default function App() {
                 tabBarActiveTintColor: "#339977",
                 tabBarInactiveTintColor: "#888888",
                 tabBarLabelStyle: {
-                  fontSize: 14,
+                  fontSize: 12,
                   textTransform: "uppercase",
+                  flexWrap: "nowrap",
                   paddingTop: 10,
+                  width: 70,
                 },
                 tabBarStyle: {
                   backgroundColor: "#FFFFFF",
@@ -216,7 +218,7 @@ export default function App() {
       </Stack.Navigator> 
       : 
       <Stack.Navigator screenOptions={{headerShown: false }}>
-        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="LoginScreen" component={LoginScreen} />
         <Stack.Screen name="NewUserScreen" component={NewUserScreen} />
       </Stack.Navigator>
       }
