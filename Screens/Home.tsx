@@ -23,18 +23,20 @@ export default function HomeScreen({ session }: { session: Session }) {
     // .select('name, orchestral_sections(*)')
     // .eq('orchestral_sections.name', 'percussion');
 
-    //console.log(data);
+    console.log(data);
     setRecordedActivities(data);
     }
 
   useEffect(() => {
+
+    
     getRecordedActivities();
 
   });
 
   return (
     <View style={styles.container}>
-      {recordedActivities ?
+      {!recordedActivities ?
         <Text style={styles.title}>No Activities Recorded Yet!</Text>
       :
         // <RecordedActivityList data={recordedActivities} />
