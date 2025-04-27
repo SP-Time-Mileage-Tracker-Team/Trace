@@ -23,7 +23,7 @@ export default function HomeScreen({ session }: { session: Session }) {
     // .select('name, orchestral_sections(*)')
     // .eq('orchestral_sections.name', 'percussion');
 
-    console.log(data);
+    //console.log(data);
     setRecordedActivities(data);
     }
 

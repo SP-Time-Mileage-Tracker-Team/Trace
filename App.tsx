@@ -172,7 +172,7 @@ export default function App() {
 
               <Tab.Screen
                 name="Record"
-                component={RecordScreen}
+                children={()=><RecordScreen key={session.user.id} session={session}/>}
                 options={{
                   tabBarIcon: ({ focused }) => (
                     <TabBarIcon

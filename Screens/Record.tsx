@@ -2,9 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import MapView, { LatLng, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Button } from 'react-native-paper';
-import TabBarIcon from '../components/TabBarIcon';
 import * as Location from 'expo-location';
 import * as TaskManager from "expo-task-manager"
+import { supabase } from '../Supabase'
+import { Session } from '@supabase/supabase-js'
 
 const TASK_NAME = "BACKGROUND_LOCATION_TASK"
 const DEFAULT_LATITUDE = 33.0;
@@ -16,7 +17,7 @@ const INITIAL_REGION = {
   longitudeDelta: 0.0421,
 };
 
-export default function RecordScreen() {
+export default function RecordScreen({ session }: { session: Session }) {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [recording, setRecording] = useState(false);
@@ -24,10 +25,32 @@ export default function RecordScreen() {
   const [timerText, setTimerText] = useState("");
   const startTimeRef = useRef(0);
   const [activityName, setActivityName] = useState("Walking");
-  const [routeCoordinates, setRouteCoordinates] = useState<any>([]);
+  const [routeCoordinates, setRouteCoordinates] = useState<Array<LatLng>>([]);
+  const [startTime, setStartTime] = useState<any>();
+  const [endTime, setEndTime] = useState<any>();
   const [showUserLocation, setShowUserLocation] = useState(false);
   const [followUserLocation, setFollowUserLocation] = useState(false);
   const [hasLocationPermission, setHasLocationPermission] = useState(false);
+
+  async function saveRecordedActivity(
+    activity_name: string, 
+    route_coordinates: any, 
+    start_time: any, 
+    end_time: any, 
+    user_id: any) 
+  {
+    const { error } = await supabase
+      .from('RecordedActivities')
+      .insert({ 
+        "activity_name": activity_name, 
+        "route_coordinates": route_coordinates,
+        "start_time": start_time,
+        "end_time": end_time,
+        "user_id": user_id}
+      );
+
+      console.log(error);
+  }
 
   async function requestLocationPermissions() {
     const foregroundPermission = await Location.requestForegroundPermissionsAsync();
@@ -62,33 +85,23 @@ export default function RecordScreen() {
       console.error(error);
       return;
     }
-    if (data) {
-      /* Data object example:
-        {
-          locations: [
-            {
-              coords: {
-                accuracy: 22.5,
-                altitude: 61.80000305175781,
-                altitudeAccuracy: 1.3333333730697632,
-                heading: 0,
-                latitude: 36.7384187,
-                longitude: 3.3464008,
-                speed: 0,
-              },
-              timestamp: 1640286402303,
-            },
-          ],
-        };
-      */
-  
+    if (data?.locations?.length) {
+      
       const { locations } = data;
       const location = locations[0];
   
       if (location) {
         // Do something with location...
         setLocation(location);
-        setRouteCoordinates(routeCoordinates.concat(location.coords));
+
+        // format route coordinates as [{"longitude": ..., "latitude": ...}]
+
+        const coords = locations.map(loc => ({
+          "latitude": loc.coords.latitude,
+          "longitude": loc.coords.longitude,
+        }));
+
+        setRouteCoordinates(prev => [...prev, ...coords]);
 
         console.log(routeCoordinates);
       }
@@ -123,12 +136,24 @@ export default function RecordScreen() {
 
   const handlePressRecord = () => {
     if (recording) {
+      setEndTime(new Date().toISOString());
       console.log("Stop recording");
       setRecording(false);
       setShowUserLocation(false);
       setFollowUserLocation(false);
       Location.stopLocationUpdatesAsync(TASK_NAME)
+
+      // -------------
+      // save activity
+      // -------------
+      saveRecordedActivity(
+        activityName, 
+        routeCoordinates, 
+        startTime, 
+        endTime, 
+        session.user.id);
     } else {
+      setStartTime(new Date().toISOString());
       console.log("Start recording");
 
       if (hasLocationPermission) {
@@ -157,7 +182,8 @@ export default function RecordScreen() {
         setRecording(false);
         requestLocationPermissions();
       }
-      // TODO:: save activity
+
+      // save?
       setTime(0);
     }
   };
@@ -195,22 +221,21 @@ export default function RecordScreen() {
           followsUserLocation={followUserLocation}
         >
           {routeCoordinates.length > 1 && (
-                    <Polyline
-                        coordinates={routeCoordinates}
-                        strokeColor="#000"
-                        strokeWidth={3}
-                        lineDashPattern={[]}
-                    />
-                )}
-                {/* {location && (
-                    <Marker
-                      coordinate={{ 
-                        latitude: location ? location.coords.latitude : DEFAULT_LATITUDE, 
-                        longitude: location ? location.coords.longitude : DEFAULT_LONGITUDE 
-                      }}
-                      title="Current Location"
-                    />
-                )} */}
+              <Polyline
+                  coordinates={routeCoordinates}
+                  strokeColor="#228B22"
+                  strokeWidth={3}
+              />
+          )}
+          {/* {location && (
+              <Marker
+                coordinate={{ 
+                  latitude: location ? location.coords.latitude : DEFAULT_LATITUDE, 
+                  longitude: location ? location.coords.longitude : DEFAULT_LONGITUDE 
+                }}
+                title="Current Location"
+              />
+          )} */}
         </MapView>
       </View>
       <View className='flex flex-row w-full h-40 justify-center'>
